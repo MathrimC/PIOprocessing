@@ -15,19 +15,13 @@ using System.Windows.Shapes;
 namespace PIOprocessing.Views
 {
     /// <summary>
-    /// Interaction logic for ShellView.xaml
+    /// Interaction logic for HandBrowserView.xaml
     /// </summary>
-    public partial class ShellView : Window
+    public partial class HandBrowserView : Window
     {
-        public ShellView()
+        public HandBrowserView()
         {
             InitializeComponent();
-        }
-
-
-        private void BtnBrowse_Click(object sender, RoutedEventArgs e)
-        {
-
         }
     }
 }

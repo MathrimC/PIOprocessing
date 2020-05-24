@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.IO;
 using System;
 using Caliburn.Micro;
+using System.Windows;
 
 namespace PIOprocessing {
     class ReportReader
@@ -47,6 +48,7 @@ namespace PIOprocessing {
         public List<Report> Reports {get {return reports;}}
         public ReportReader(string path)
         {
+            staticTimer.start("ReportScanning");
             this.path = path;
             isLoaded = false;
             reports = new List<Report>();
@@ -58,6 +60,8 @@ namespace PIOprocessing {
             boardSubtypeLists = new SortedDictionary<string,HashSet<string>>();
             reportList = new SortedDictionary<string,Report>();
             loadReportFiles();
+            staticTimer.stop("ReportScanning");
+            staticTimer.log("ReportScanning");
         }
 
         public void Refresh()
@@ -75,18 +79,31 @@ namespace PIOprocessing {
                 loadReportFiles(subDirectory);
             }
             string[] filePaths = Directory.GetFiles(subpath);
+            int stacksize = 0;
+            List<Report> tmpReportList = new List<Report>();
             foreach(string filePath in filePaths) {
                 if(isFrequencyReport(filePath)) {
                     Report report = new Report(filePath);
                     if (report.ResolvedSpot)
                     {
                         reports.Add(report);
+                        tmpReportList.Add(report);
                         addToSpotTree(report);
                     } else
                     {
                         unprocessedReports.Add(report);
                     }
+                } else {
+                    int size = tryGetStackSize(filePath);
+                    if(size > 0)
+                    {
+                        stacksize = size;
+                    }
                 }
+            }
+            foreach(Report report in tmpReportList)
+            {
+                report.Stacksize = stacksize;
             }
         }
 
@@ -126,6 +143,36 @@ namespace PIOprocessing {
 
         }
 
+        // If the file is a PIO info file, it extracts the stacksize, otherwise it returns 0
+        protected int tryGetStackSize(string filePath)
+        {
+            if(!filePath.EndsWith("info.txt")) {
+                return 0;
+            }
+
+            using (var file = new FileStream(@filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+            using (var reader = new StreamReader(file))
+            {
+
+                int lineIndex = 0;
+                while (lineIndex < 4 && !reader.EndOfStream)
+                {
+                    reader.ReadLine();
+                    lineIndex++;
+                }
+                if(!reader.EndOfStream)
+                {
+                    
+                    string line = reader.ReadLine();
+                    string[] values = line.Split(' ');
+                    return int.Parse(values[2]);
+                } else
+                {
+                    return 0;
+                }
+            }
+        }
+        
         protected bool isFrequencyReport(string filePath) {
             if(!filePath.EndsWith("_Full.csv")) {
                 return false;

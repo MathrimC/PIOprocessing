@@ -20,7 +20,7 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="20"/>
             <RowDefinition Height="auto"/>
-            <RowDefinition Height="20"/>
+            <RowDefinition Height="auto"/>
             <RowDefinition Height="auto"/>
             <RowDefinition Height="auto"/>
             <RowDefinition Height="auto"/>
@@ -35,11 +35,15 @@
         <TextBlock Text="Reports folder:" Margin="5" Grid.Row="1" Grid.Column="1" 
                    Grid.ColumnSpan="1" HorizontalAlignment="Right" VerticalAlignment="Center"></TextBlock>
         <Button Width="75" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="0,5,0,0" Grid.Row="1" Grid.Column="2"
-                Content="Browse" x:Name="BtnBrowse" FontSize="18"/>
+                Content="Browse" x:Name="BtnBrowse" FontSize="16"/>
         <TextBlock MinWidth="100" Margin="90,5,0,0" Grid.Row="1" Grid.Column="2" x:Name="ReportsPath" FontSize="18"
-                 Grid.ColumnSpan="3" VerticalAlignment="Center"></TextBlock>
-        <Button Width="40" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,0,0,0" Grid.Row="1" Grid.Column="4"
-                Content="Meh" x:Name="BtnClearGraph" FontSize="12" Visibility="{Binding Path=GraphVisibility}" />
+                 Grid.ColumnSpan="3" VerticalAlignment="Center" Panel.ZIndex="1"></TextBlock>
+
+        <!-- Buttons above the graph -->
+        <Button Grid.Row="2" Grid.Column="4" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="60,0"
+                Content="Browse hands" x:Name="BrowseHands" FontSize="16" Visibility="{Binding Path=GraphVisibility}" Panel.ZIndex="2" />
+        <Button Width="50" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,0,0,0" Grid.Row="2" Grid.Column="4"
+                Content="Clear" x:Name="BtnClearGraph" FontSize="16" Visibility="{Binding Path=GraphVisibility}" Panel.ZIndex="2" />
 
         <!-- Row 2 -->
         <TextBlock Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="4" Margin="20,0,0,0"
@@ -52,10 +56,10 @@
 
         <!-- Row 4 -->
         <ComboBox Grid.Row="4" Grid.Column="1" x:Name="Actions"
-                  SelectedItem="{Binding Path=SelectedAction, Mode=OneWayToSource}"
+                  SelectedItem="{Binding Path=SelectedAction}"
                   Margin="10,5,10,5"/>
         <ComboBox Grid.Row="4" Grid.Column="2" x:Name="AggPosList"
-                  SelectedItem="{Binding Path=SelectedAggPos, Mode=OneWayToSource}"
+                  SelectedItem="{Binding Path=SelectedAggPos}"
                   Margin="10,5,10,5"/>
         <ComboBox Grid.Row="4" Grid.Column="3" x:Name="CllPosList"
                   SelectedItem="{Binding Path=SelectedCllPos}"
@@ -100,11 +104,12 @@
 
     
         
+        
         <!-- Graph -->
-        <oxy:PlotView Grid.Row="3" Grid.Column="4" Grid.RowSpan="9" Model="{Binding PlotModel}" Visibility="{Binding Path=GraphVisibility}">
+        <oxy:PlotView Grid.Row="{Binding Path=GraphRow}" Grid.Column="{Binding Path=GraphColumn}" Grid.RowSpan="9" Model="{Binding PlotModel}" Visibility="{Binding Path=GraphVisibility}" Panel.ZIndex="1">
             
         </oxy:PlotView>
 
-        <Image Grid.Row="2" Grid.Column="4" Grid.RowSpan="9" gif:ImageBehavior.AnimatedSource="/Images/Placeholder.gif" Visibility="{Binding Path=PlaceholderVisibility}"/>
+        <Image Grid.Row="{Binding Path=GraphRow}" Grid.Column="{Binding Path=GraphColumn}" Grid.RowSpan="9" gif:ImageBehavior.AnimatedSource="/Images/Placeholder.gif" Visibility="{Binding Path=PlaceholderVisibility}"/>
     </Grid>
 </Window>

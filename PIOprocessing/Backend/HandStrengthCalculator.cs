@@ -4,6 +4,7 @@ using System;
 using System.Reflection;
 
 namespace PIOprocessing {
+    
     public enum HandCategory {StraightFlush, Quads, FullHouse, Flush, Straight, ThreeOfAKind, TwoPair, Overpair, TopPair, Underpair, SecondPair, NogroupPP, ThirdPair, LowPair, NutAir, SecondNutAir, RestAir, Unknown}
     public enum HandType {Unknown, 
         NA_S_FD, NA_S_BDFD, NA_O_NFD, NA_O_BDNFD, NA_OESD, NA_OTHER,
@@ -34,8 +35,9 @@ namespace PIOprocessing {
     enum SetType {Top, Middle, Bottom}
     class HandStrengthCalculator
     {
-        
-        
+        // the index is the three sorted flop ranks followed by the two sorted handranks
+        // static Dictionary<int[], HandStrengthCalculator> ranksCache = new Dictionary<int[], HandStrengthCalculator>();
+
 
         protected Hand hand;
         protected HandStrength handStrength;
@@ -50,6 +52,18 @@ namespace PIOprocessing {
         }
 
         protected bool strengthCalculated;
+
+        public int[] RankMatches { get { return rankMatches; } }
+        public int MatchRank { get { return matchRank; } }
+        public int KickerRank { get { return kickerRank; } }
+        public int BoardMatches { get { return boardMatches; } }
+        public int MatchOrder { get { return matchOrder; } }
+        public int AirOrder { get { return airOrder; } }
+        public int KickerOrder { get { return kickerOrder; } }
+        public StraightRank StraightRank { get { return straightRank; } }
+        public int StraightDrawOrder { get { return straightDrawOrder; } }
+        public StraightType StraightType { get { return straightType; } }
+        public List<int> StraightRanks { get { return straightRanks; } }
 
         // rank match variables
         protected int[] rankMatches;
@@ -72,6 +86,8 @@ namespace PIOprocessing {
         protected char suit;
         protected int flushOrder;
 
+        protected bool usedCache;
+
         public HandStrengthCalculator(Hand hand) {
             this.hand = hand;
             handStrength.Category = HandCategory.Unknown;
@@ -79,17 +95,51 @@ namespace PIOprocessing {
             handStrength.StrengthLabel = "";
             handStrength.StrengthOrder = 0;
             strengthCalculated = false;
+            usedCache = false;
         }
 
         private void determineHandStrength() {
+            /*
+            HandStrengthCalculator cachedObject;
+
+            if (ranksCache.TryGetValue(hand.GetRanks(), out cachedObject))
+            {
+                rankMatches = cachedObject.RankMatches;
+                matchRank = cachedObject.MatchRank;
+                kickerRank = cachedObject.KickerRank;
+                boardMatches = cachedObject.BoardMatches;
+                matchOrder = cachedObject.MatchOrder;
+                airOrder = cachedObject.AirOrder;
+                kickerOrder = cachedObject.KickerOrder;
+                straightRank = cachedObject.StraightRank;
+                straightDrawOrder = cachedObject.StraightDrawOrder;
+
+                straightType = cachedObject.StraightType;
+                straightRanks = cachedObject.StraightRanks;
+
+                usedCache = true;
+            } else {
+            */
             determineMatchesAndRanks();
             determineStraightCount();
+            
             determineSuitCount();
             determineHandCategory();
             determineHandType();
+            /*
+            if(!usedCache)
+            {
+                ranksCache.Add(hand.GetRanks(), this);
+            }
+            */
+            strengthCalculated = true;
         }
 
         private void determineMatchesAndRanks() {
+            if(usedCache)
+            {
+                return;
+            }
             // what we need:
             // #matches card 1 & 2, rank of the matches, kickerrank
             rankMatches = new int[] {0,0};
@@ -109,6 +159,11 @@ namespace PIOprocessing {
         }
 
         private void determineStraightCount() {
+            if(usedCache)
+            {
+                return;
+            }
+            
             List<Card> cards = new List<Card>(hand.FlopCards);
             straightType = StraightType.OpenEnded;
 
@@ -195,6 +250,11 @@ namespace PIOprocessing {
             }
         }
         private void determineStraigthDrawStrength() {
+            if(usedCache)
+            {
+                return;
+            }
+
             if(straightRanks[straightRanks.Count-1] == 14) {
                 straightRank = StraightRank.Nut;
                 straightDrawOrder = 1;
@@ -455,6 +515,8 @@ namespace PIOprocessing {
 
         // calculates the highcard order (1: nuthigh, 2: second-nut-high, ...) 
         private void determineHighCardOrder() {
+            
+
             int highRank = hand.HoleCards[1].RankNumber;
             int lowRank = hand.HoleCards[0].RankNumber;
             
@@ -476,6 +538,11 @@ namespace PIOprocessing {
 
         // translates the pair rank and kickerrank into an order (1: nut, 2: 2nd nuts, 3: 3rd nuts, ...)
         private void determineMatchOrder() {      
+            if(usedCache)
+            {
+                return;
+            }
+            
             matchOrder = 1;
 
             int kickerBoost = 0;

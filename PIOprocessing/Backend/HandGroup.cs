@@ -1,5 +1,7 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 namespace PIOprocessing {
     
@@ -10,9 +12,12 @@ namespace PIOprocessing {
         protected string spot;
         protected HandCategory category;
         protected HandType handType;
-        // dictionary of grouped hands, indexed by handstreangth order
+        // dictionary of grouped hands, indexed by handstrength order
         protected SortedDictionary<int,List<Hand>> groupedHands;
 
+        // dictionary of hand strength labels, indexed by handstrength order
+        protected SortedDictionary<int, string> strengthLabels;
+        
         // dictionary of average frequencies, indexed by frequency label (graphline)
         protected Dictionary<string,FrequencyValues> groupedFrequencies;
 
@@ -20,6 +25,7 @@ namespace PIOprocessing {
             groupType = HandGroupType.HandType;
             handType = type;
             groupedHands = new SortedDictionary<int,List<Hand>>();
+            strengthLabels = new SortedDictionary<int, string>();
             groupedFrequencies = new Dictionary<string,FrequencyValues>();
             filterHands(reportHands, type);
         }
@@ -27,7 +33,27 @@ namespace PIOprocessing {
             groupType = HandGroupType.HandType;
             handType = type;
             groupedHands = new SortedDictionary<int,List<Hand>>();
+            strengthLabels = new SortedDictionary<int, string>();
             groupedFrequencies = new Dictionary<string,FrequencyValues>();
+        }
+
+        public List<int> GetStrengthOrders()
+        {
+            return groupedHands.Keys.ToList();
+        }
+        public List<Hand> GetHands(int strengthOrder)
+        {
+            return groupedHands[strengthOrder];
+        }
+
+        public string GetStrengthLabel(int strengthOrder)
+        {
+            string label;
+            if(!strengthLabels.TryGetValue(strengthOrder, out label))
+            {
+                label = "";
+            }
+            return label;
         }
 
         public void addHand(Hand reportHand) {
@@ -40,6 +66,7 @@ namespace PIOprocessing {
                 List<Hand> newList = new List<Hand>();
                 newList.Add(reportHand);
                 groupedHands.Add(reportHand.Strength.StrengthOrder,newList);
+                strengthLabels.Add(reportHand.Strength.StrengthOrder, reportHand.Strength.StrengthLabel);
             }
 
             // add the hand frequencies in the frequencyvalues dictionary (ordered by frequencylabel)

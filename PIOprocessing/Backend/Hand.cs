@@ -22,9 +22,11 @@ namespace PIOprocessing {
         public HandStrength Strength {
             get {
                 if(!strengthCalculated){
+                    staticTimer.start("HandStrength");
                     HandStrengthCalculator calc = new HandStrengthCalculator (this);
                     strength = calc.HandStrength;
                     strengthCalculated = true;
+                    staticTimer.stop("HandStrength");
                 }
                 return strength;
             }
@@ -63,6 +65,11 @@ namespace PIOprocessing {
 
         public string GetRanksLabel() {
             return holeCards[0].Rank.ToString() + holeCards[1].Rank.ToString();
+        }
+
+        public int[] GetRanks()
+        {
+            return new int[5] { flopCards[0].RankNumber, flopCards[1].RankNumber, flopCards[2].RankNumber, holeCards[0].RankNumber, holeCards[1].RankNumber };
         }
 
         public string GetText() {

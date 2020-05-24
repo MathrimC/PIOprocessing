@@ -23,6 +23,7 @@ namespace PIOprocessing
         public PlotModel PlotModel { get; private set; }
 
         private HandGroup handGroup;
+        public HandGroup HandGroup { get { return handGroup; } }
 
         public SpotModel(Report report)
         {
@@ -39,12 +40,19 @@ namespace PIOprocessing
             
         }
 
+        private string getXLabel(double strengthorder)
+        {
+            return handGroup.GetStrengthLabel((int)strengthorder);
+        }
+
         public void LoadPlotModel(HandType type)
         {
             string title = $"{Report.Spot.Action} {Report.Spot.AggPos}vs{Report.Spot.CllPos} {Report.Spot.BoardType} {Report.Spot.BoardSubtype} {type}";
             PlotModel = new PlotModel { Title =  title};
             OxyPlot.Axes.LinearAxis yAxis = new OxyPlot.Axes.LinearAxis { Position = AxisPosition.Left, MajorStep = 10, MinorStep = 10, Minimum = 0, Maximum = 100 };
             OxyPlot.Axes.LinearAxis xAxis = new OxyPlot.Axes.LinearAxis { Position = AxisPosition.Bottom, MajorStep = 1, MinorStep = 1 };
+            // CategoryAxis catAxis = new CategoryAxis( {Position = AxisPosition.Bottom, MajorStep = 1, MinorStep = 1);
+            xAxis.LabelFormatter = getXLabel;
 
             PlotModel.Axes.Add(xAxis);
             PlotModel.Axes.Add(yAxis);

@@ -8,11 +8,16 @@ using OxyPlot;
 using Microsoft.WindowsAPICodePack.Dialogs;
 using PIOprocessingInterface.Properties;
 using System.Windows.Forms.PropertyGridInternal;
+using System.Windows;
 
 namespace PIOprocessing.ViewModels
 {
     public class ShellViewModel : Conductor<object>
     {
+        IWindowManager manager = new WindowManager();
+
+
+        
         private string reportsPath;
         private string pathFeedback;
         private BindableCollection<string> actions = new BindableCollection<string>();
@@ -34,6 +39,24 @@ namespace PIOprocessing.ViewModels
 
         private string graphVisibility;
         private string placeholderVisibility;
+
+        private int graphRow;
+
+        public int GraphRow
+        {
+            get { return graphRow; }
+            set { graphRow = value; NotifyOfPropertyChange(() => GraphRow); }
+        }
+
+        private int graphColumn;
+
+        public int GraphColumn
+        {
+            get { return graphColumn; }
+            set { graphColumn = value; NotifyOfPropertyChange(() => GraphColumn); }
+        }
+
+
 
 
         private ReportReader reader;
@@ -72,6 +95,7 @@ namespace PIOprocessing.ViewModels
 
         public ShellViewModel()
         {
+            
             reportsPath = Properties.Settings.Default.ReportsPath;
             if (reportsPath == "")
             {
@@ -83,6 +107,8 @@ namespace PIOprocessing.ViewModels
             subtypesVisibility = "Hidden";
             graphVisibility = "Hidden";
             placeholderVisibility = "Visible";
+            graphRow = 3;
+            graphColumn = 4;
         }
 
         public BindableCollection<string> Actions
@@ -166,6 +192,11 @@ namespace PIOprocessing.ViewModels
                     {
                         aggPosList.Add(aggPos);
                     }
+                    if(aggPosList.Count == 1)
+                    {
+                        SelectedAggPos = aggPosList[0];
+                        NotifyOfPropertyChange(() => SelectedAggPos);
+                    }
                     // selectedAggPos = aggPosList[0];
                 }
                 
@@ -186,6 +217,11 @@ namespace PIOprocessing.ViewModels
                     {
                         cllPosList.Add(cllPos);
                     }
+                    if (cllPosList.Count == 1)
+                    {
+                        SelectedCllPos = cllPosList[0];
+                        NotifyOfPropertyChange(() => SelectedCllPos);
+                    }
                     // selectedCllPos = cllPosList[0];
                 }
                 // SelectedCllPos = null;
@@ -193,6 +229,7 @@ namespace PIOprocessing.ViewModels
                 // NotifyOfPropertyChange(() => SelectedAggPos);
             }
         }
+
         public string SelectedCllPos
         {
             get { return selectedCllPos; }
@@ -205,6 +242,11 @@ namespace PIOprocessing.ViewModels
                     foreach (string boardType in reader.GetBoardTypeList(selectedAction, selectedAggPos, selectedCllPos))
                     {
                         boardTypeList.Add(boardType);
+                    }
+                    if (boardTypeList.Count == 1)
+                    {
+                        SelectedBoardType = boardTypeList[0];
+                        NotifyOfPropertyChange(() => SelectedBoardType);
                     }
                     // selectedCllPos = cllPosList[0];
                 }
@@ -221,7 +263,6 @@ namespace PIOprocessing.ViewModels
                 selectedBoardType = value;
                 boardSubtypeList.Clear();
 
-           
                 spot = null;
                 if (selectedBoardType != null)
                 {
@@ -237,8 +278,12 @@ namespace PIOprocessing.ViewModels
                         loadReport();
                         NotifyOfPropertyChange(() => Spot);
                     }
-                    else
-                    {
+                    else {
+                        if (boardSubtypeList.Count == 1)
+                        {
+                        SelectedBoardSubtype = boardSubtypeList[0];
+                        NotifyOfPropertyChange(() => SelectedBoardSubtype);
+                        } 
                         subtypesVisibility = "Visible";
                     }
                 }
@@ -298,9 +343,16 @@ namespace PIOprocessing.ViewModels
             }
         }
 
+        public void BrowseHands()
+        {
+            manager.ShowWindow(new HandBrowserViewModel(spot.HandGroup), null, null);
+            // ActivateItem(new HandBrowserViewModel(spot.HandGroup));
+        }
+
 
         public void RefreshPath()
         {
+            staticTimer.start("Total");
             if (System.IO.Directory.Exists(reportsPath))
             {
                 reader = new ReportReader(reportsPath);
@@ -320,11 +372,15 @@ namespace PIOprocessing.ViewModels
                 NotifyOfPropertyChange(() => actions);
                 NotifyOfPropertyChange(() => reportsPath);
             }
-            // add error "directory doesn't exist" to textfield
+            staticTimer.stop("Total");
+            staticTimer.log("Total");
+            
         }
 
         private void loadReport()
         {
+            staticTimer.reset();
+            staticTimer.start("Total");
             Report report = reader.GetReport(selectedAction, selectedAggPos, selectedCllPos, selectedBoardType, selectedBoardSubtype);
             spot = new SpotModel(report);
 
@@ -350,6 +406,22 @@ namespace PIOprocessing.ViewModels
                 selectedType = null;
             }
             NotifyOfPropertyChange(() => Spot);
+            staticTimer.stop("Total");
+            staticTimer.log("Total");
+        }
+
+        public void update_size(object sender, SizeChangedEventArgs e)
+        {
+            if (e.NewSize.Width < 420)
+            {
+                GraphRow = 10;
+                GraphColumn = 1;
+            } else
+            {
+                GraphRow = 3;
+                GraphColumn = 4;
+            }
+
         }
 
     }

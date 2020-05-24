@@ -1,7 +1,11 @@
+using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 
 namespace PIOprocessing {
+    
+    
     public struct Spot
     {
         public string Action;
@@ -13,9 +17,15 @@ namespace PIOprocessing {
     
     public class Report
     {
+        public static bool useRelativeBetsizes = true;
         protected string filePath;
         protected Spot spot;
         protected bool resolvedSpot;
+        protected int stacksize;
+        public int Stacksize { get { return stacksize; } set { stacksize = value; DeterminePotsize(); } }
+        protected int potsize;
+        public int Potsize { get { return potsize; } }
+
 
         public Spot Spot { get { return spot; } }
         public bool ResolvedSpot { get { return resolvedSpot; } }
@@ -23,6 +33,7 @@ namespace PIOprocessing {
         protected List<string[]> data;
         protected string[] headers;
         protected List<int> freqColumns;
+        protected List<string> freqLabels;
         protected List<Hand> hands;
         public List<Hand> Hands
         {
@@ -123,6 +134,7 @@ namespace PIOprocessing {
                 outputHeaders[index] = headers[freqColumn];
                 index++;
             }
+
             file.writeCsvLine(outputHeaders);
 
             foreach(Hand hand in Hands) {
@@ -145,6 +157,20 @@ namespace PIOprocessing {
             // write data
         }
 
+        private void DeterminePotsize()
+        {
+            potsize = (1000 - stacksize) * 2;
+            if(spot.AggPos != "BB" && spot.CllPos != "BB")
+            {
+                potsize += 10;
+            }
+            if (spot.AggPos != "SB" && spot.CllPos != "SB")
+            {
+                potsize += 5;
+            }
+            // Console.WriteLine($"{GetReportDirectory()} potsize: {potsize}, stacksize: {stacksize}");
+        }
+
         private bool determineSpot()
         {
             string folderName = GetReportDirectory();
@@ -164,32 +190,71 @@ namespace PIOprocessing {
             return true;
         }
 
+        private string getRelativeFrequencyLabel(string frequencyLabel)
+        {
+            // NumberFormatInfo setPrecision = new NumberFormatInfo();
+            // setPrecision.NumberDecimalDigits = 2;
+            string[] splitLabel = frequencyLabel.Split(' ');
+            if (splitLabel.Length > 2 && !splitLabel[1].EndsWith("%"))
+            {
+                double betPercentage = (double.Parse(splitLabel[1]) / (double)potsize) * 100;
+                // int betPercentage = (int)(double.Parse(splitLabel[1]) / potsize) * 100;
+                return $"Bet {(int)betPercentage}%";
+            } else
+            {
+                if (splitLabel[0] == "CHECK")
+                    return "Check";
+                else
+                    return frequencyLabel;
+            }
+
+        }
+        
         // Reads in the data from the CSV file and parses it to the Data collection
         protected void loadData()
         {
+            
+            freqLabels = new List<string>();
             using (var file = new FileStream (@filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
             using(var reader = new StreamReader(file))
             {
-                if(!reader.EndOfStream) {
+                staticTimer.start("ReportReading");
+                if (!reader.EndOfStream) {
                     headers = reader.ReadLine().Split(',');
                     for(int i=0; i < headers.Length; i++) {
                         if(headers[i].EndsWith("Freq")) {
                             freqColumns.Add(i);
+
+                            if (useRelativeBetsizes && potsize != 0)
+                            {
+                                freqLabels.Add(getRelativeFrequencyLabel(headers[i]));
+                            }
+                            else
+                            {
+                                freqLabels.Add(headers[i]);
+                            }
                         }
                     }
                 }
-                while(!reader.EndOfStream)
+                staticTimer.stop("ReportReading");
+
+
+                while (!reader.EndOfStream)
                 {
+                    staticTimer.start("ReportReading");
                     string line = reader.ReadLine();
                     string[] values = line.Split(',');
                     data.Add(values);
                     Dictionary<string,float> frequencies = new Dictionary<string, float>();
-                    
+
+                    int i = 0;
                     foreach(int freqColumn in freqColumns) {
-                        frequencies.Add(headers[freqColumn],float.Parse(values[freqColumn]));
+                        frequencies.Add(freqLabels[i],float.Parse(values[freqColumn]));
+                        i++;
                     }
                     Hand hand = new Hand(values[Mappings.ReportColumns["Flop"]],values[Mappings.ReportColumns["Hand"]],float.Parse(values[Mappings.ReportColumns["Weight"]]),frequencies);
                     hands.Add(hand);
+                    staticTimer.stop("ReportReading");
                     HandGroup group;
                     if(handTypes.TryGetValue(hand.Strength.Type,out group)) {
                         group.addHand(hand);
@@ -210,6 +275,9 @@ namespace PIOprocessing {
                     }
                 }
             }
+            staticTimer.log("ReportReading");
+            staticTimer.log("HandStrength");
+
             isLoaded = true;
         }
     }
