@@ -14,6 +14,7 @@ using System.Windows.Shapes;
 
 namespace PIOprocessing.Views
 {
+
     /// <summary>
     /// Interaction logic for HandBrowserView.xaml
     /// </summary>
@@ -22,6 +23,8 @@ namespace PIOprocessing.Views
         public HandBrowserView()
         {
             InitializeComponent();
+            
         }
+
     }
 }

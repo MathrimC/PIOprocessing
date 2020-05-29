@@ -9,15 +9,17 @@ using Microsoft.WindowsAPICodePack.Dialogs;
 using PIOprocessingInterface.Properties;
 using System.Windows.Forms.PropertyGridInternal;
 using System.Windows;
+using PIOprocessing.Views;
+using System.Windows.Controls;
 
 namespace PIOprocessing.ViewModels
 {
+    
     public class ShellViewModel : Conductor<object>
     {
         IWindowManager manager = new WindowManager();
-
-
         
+
         private string reportsPath;
         private string pathFeedback;
         private BindableCollection<string> actions = new BindableCollection<string>();
@@ -56,6 +58,7 @@ namespace PIOprocessing.ViewModels
             set { graphColumn = value; NotifyOfPropertyChange(() => GraphColumn); }
         }
 
+        // public int GraphWidth;
 
 
 
@@ -95,7 +98,8 @@ namespace PIOprocessing.ViewModels
 
         public ShellViewModel()
         {
-            
+
+            // this.eventAggregator = eventAggregator;
             reportsPath = Properties.Settings.Default.ReportsPath;
             if (reportsPath == "")
             {
@@ -107,8 +111,9 @@ namespace PIOprocessing.ViewModels
             subtypesVisibility = "Hidden";
             graphVisibility = "Hidden";
             placeholderVisibility = "Visible";
-            graphRow = 3;
-            graphColumn = 4;
+            graphRow = 0;
+            graphColumn = 1;
+
         }
 
         public BindableCollection<string> Actions
@@ -264,6 +269,7 @@ namespace PIOprocessing.ViewModels
                 boardSubtypeList.Clear();
 
                 spot = null;
+                // TypeList.Clear();
                 if (selectedBoardType != null)
                 {
                     foreach (string boardSubtype in reader.GetSubtypeList(selectedAction, selectedAggPos, selectedCllPos, selectedBoardType))
@@ -283,12 +289,13 @@ namespace PIOprocessing.ViewModels
                         {
                         SelectedBoardSubtype = boardSubtypeList[0];
                         NotifyOfPropertyChange(() => SelectedBoardSubtype);
-                        } 
+                        }
                         subtypesVisibility = "Visible";
                     }
                 }
                 NotifyOfPropertyChange(() => HasBoardSubtypes);
                 NotifyOfPropertyChange(() => SubtypesVisibility);
+                NotifyOfPropertyChange(() => Spot);
             }
         }
 
@@ -336,10 +343,10 @@ namespace PIOprocessing.ViewModels
                     graphVisibility = "Visible";
                     placeholderVisibility = "Hidden";
                     spot.LoadPlotModel((HandType)selectedType);
+                    NotifyOfPropertyChange(() => PlotModel);
+                    NotifyOfPropertyChange(() => GraphVisibility);
+                    NotifyOfPropertyChange(() => PlaceholderVisibility);
                 }
-                NotifyOfPropertyChange(() => PlotModel);
-                NotifyOfPropertyChange(() => GraphVisibility);
-                NotifyOfPropertyChange(() => PlaceholderVisibility);
             }
         }
 
@@ -410,19 +417,25 @@ namespace PIOprocessing.ViewModels
             staticTimer.log("Total");
         }
 
-        public void update_size(object sender, SizeChangedEventArgs e)
+        
+
+        public void UpdateSize(ShellView window)
         {
-            if (e.NewSize.Width < 420)
+            
+            if (window.ActualWidth < 800)
             {
-                GraphRow = 10;
-                GraphColumn = 1;
-            } else
-            {
-                GraphRow = 3;
-                GraphColumn = 4;
+                GraphRow = 1;
+                GraphColumn = 0;
+                // GraphWidth = (int)e.NewSize.Width - 40;
             }
-
+            else
+            {
+                GraphRow = 0;
+                GraphColumn = 1;
+                // GraphWidth = (int)e.NewSize.Width - 340;
+            }
+            NotifyOfPropertyChange(() => GraphRow);
+            
         }
-
     }
 }

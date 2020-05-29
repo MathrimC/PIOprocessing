@@ -259,7 +259,7 @@ namespace PIOprocessing {
                     if(handTypes.TryGetValue(hand.Strength.Type,out group)) {
                         group.addHand(hand);
                     } else {
-                        HandGroup newGroup = new HandGroup(hand.Strength.Type);
+                        HandGroup newGroup = new HandGroup(spot,hand.Strength.Category,hand.Strength.Type);
                         newGroup.addHand(hand);
                         handTypes.Add(hand.Strength.Type,newGroup);
                     }

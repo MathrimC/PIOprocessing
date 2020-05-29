@@ -24,10 +24,6 @@ namespace PIOprocessing.Views
             InitializeComponent();
         }
 
-
-        private void BtnBrowse_Click(object sender, RoutedEventArgs e)
-        {
-
-        }
+ 
     }
 }

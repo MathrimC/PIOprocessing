@@ -7,7 +7,7 @@
     <ProjectGuid>{A201E851-9E0C-4597-90E5-FF136EE2DDF8}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <RootNamespace>PIOprocessing</RootNamespace>
-    <AssemblyName>PIOprocessing</AssemblyName>
+    <AssemblyName>PIO-Report-Browser</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
@@ -118,7 +118,6 @@
     <Compile Include="Backend\HandGroup.cs" />
     <Compile Include="Backend\HandStrengthCalculator.cs" />
     <Compile Include="Backend\Mappings.cs" />
-    <Compile Include="Models\HandModel.cs" />
     <Compile Include="Models\SpotModel.cs" />
     <Compile Include="Backend\OutputFile.cs" />
     <Compile Include="Backend\Program.cs" />

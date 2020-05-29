@@ -9,9 +9,14 @@ namespace PIOprocessing {
     public class HandGroup
     {
         protected HandGroupType groupType;
-        protected string spot;
+        protected Spot spot;
+        public Spot Spot { get { return spot; } }
+
         protected HandCategory category;
+        public HandCategory Category { get { return category; } }
+
         protected HandType handType;
+        public HandType HandType { get { return handType; } }
         // dictionary of grouped hands, indexed by handstrength order
         protected SortedDictionary<int,List<Hand>> groupedHands;
 
@@ -28,6 +33,12 @@ namespace PIOprocessing {
             strengthLabels = new SortedDictionary<int, string>();
             groupedFrequencies = new Dictionary<string,FrequencyValues>();
             filterHands(reportHands, type);
+        }
+
+        public HandGroup(Spot spot, HandCategory category, HandType type): this(type)
+        {
+            this.spot = spot;
+            this.category = category;
         }
         public HandGroup(HandType type) {
             groupType = HandGroupType.HandType;

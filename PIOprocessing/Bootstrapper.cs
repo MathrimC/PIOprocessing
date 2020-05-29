@@ -11,10 +11,20 @@ namespace PIOprocessing
 {
     public class Bootstrapper : BootstrapperBase
     {
+        // private readonly SimpleContainer container = new SimpleContainer();
+
         public Bootstrapper()
         {
             Initialize();
         }
+
+        /*
+        protected override void Configure()
+        {
+            container.Singleton<IEventAggregator, EventAggregator>();
+            base.Configure();
+        }
+        */
 
         protected override void OnStartup(object sender, StartupEventArgs e)
         {
