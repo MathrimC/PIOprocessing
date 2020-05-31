@@ -34,5 +34,77 @@ namespace PIOprocessing.Properties {
                 this["ReportsPath"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool RelativeBetsize {
+            get {
+                return ((bool)(this["RelativeBetsize"]));
+            }
+            set {
+                this["RelativeBetsize"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("1000")]
+        public int StartingStacks {
+            get {
+                return ((int)(this["StartingStacks"]));
+            }
+            set {
+                this["StartingStacks"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("5")]
+        public int SmallBlind {
+            get {
+                return ((int)(this["SmallBlind"]));
+            }
+            set {
+                this["SmallBlind"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("10")]
+        public int BigBlind {
+            get {
+                return ((int)(this["BigBlind"]));
+            }
+            set {
+                this["BigBlind"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("Light")]
+        public string Theme {
+            get {
+                return ((string)(this["Theme"]));
+            }
+            set {
+                this["Theme"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool GroupHands {
+            get {
+                return ((bool)(this["GroupHands"]));
+            }
+            set {
+                this["GroupHands"] = value;
+            }
+        }
     }
 }

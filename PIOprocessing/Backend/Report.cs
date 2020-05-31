@@ -159,14 +159,15 @@ namespace PIOprocessing {
 
         private void DeterminePotsize()
         {
-            potsize = (1000 - stacksize) * 2;
+            // Console.WriteLine("Starting stacks: " + Properties.Settings.Default.StartingStacks);
+            potsize = (Properties.Settings.Default.StartingStacks - stacksize) * 2;
             if(spot.AggPos != "BB" && spot.CllPos != "BB")
             {
-                potsize += 10;
+                potsize += Properties.Settings.Default.BigBlind;
             }
             if (spot.AggPos != "SB" && spot.CllPos != "SB")
             {
-                potsize += 5;
+                potsize += Properties.Settings.Default.SmallBlind;
             }
             // Console.WriteLine($"{GetReportDirectory()} potsize: {potsize}, stacksize: {stacksize}");
         }
@@ -190,22 +191,32 @@ namespace PIOprocessing {
             return true;
         }
 
-        private string getRelativeFrequencyLabel(string frequencyLabel)
+        private string getFrequencyLabel(string frequencyHeader)
         {
-            // NumberFormatInfo setPrecision = new NumberFormatInfo();
-            // setPrecision.NumberDecimalDigits = 2;
-            string[] splitLabel = frequencyLabel.Split(' ');
-            if (splitLabel.Length > 2 && !splitLabel[1].EndsWith("%"))
-            {
-                double betPercentage = (double.Parse(splitLabel[1]) / (double)potsize) * 100;
-                // int betPercentage = (int)(double.Parse(splitLabel[1]) / potsize) * 100;
-                return $"Bet {(int)betPercentage}%";
+            if (Properties.Settings.Default.RelativeBetsize && potsize != 0) { 
+                // NumberFormatInfo setPrecision = new NumberFormatInfo();
+                // setPrecision.NumberDecimalDigits = 2;
+                string[] splitLabel = frequencyHeader.Split(' ');
+                if (splitLabel.Length > 2 && !splitLabel[1].EndsWith("%"))
+                {
+                    double betPercentage = (double.Parse(splitLabel[1]) / (double)potsize) * 100;
+                    if((int)betPercentage < 2)
+                    {
+                        return frequencyHeader;
+                    }
+                    // int betPercentage = (int)(double.Parse(splitLabel[1]) / potsize) * 100;
+                    return $"Bet {(int)betPercentage}%";
+                }
+                else
+                {
+                    if (splitLabel[0] == "CHECK")
+                        return "Check";
+                    else
+                        return frequencyHeader;
+                }
             } else
             {
-                if (splitLabel[0] == "CHECK")
-                    return "Check";
-                else
-                    return frequencyLabel;
+                return frequencyHeader;
             }
 
         }
@@ -213,7 +224,7 @@ namespace PIOprocessing {
         // Reads in the data from the CSV file and parses it to the Data collection
         protected void loadData()
         {
-            
+            DeterminePotsize();
             freqLabels = new List<string>();
             using (var file = new FileStream (@filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
             using(var reader = new StreamReader(file))
@@ -224,21 +235,14 @@ namespace PIOprocessing {
                     for(int i=0; i < headers.Length; i++) {
                         if(headers[i].EndsWith("Freq")) {
                             freqColumns.Add(i);
-
-                            if (useRelativeBetsizes && potsize != 0)
-                            {
-                                freqLabels.Add(getRelativeFrequencyLabel(headers[i]));
-                            }
-                            else
-                            {
-                                freqLabels.Add(headers[i]);
-                            }
+                            freqLabels.Add(getFrequencyLabel(headers[i]));
+                            
                         }
                     }
                 }
                 staticTimer.stop("ReportReading");
 
-
+                int rownumber = 2;
                 while (!reader.EndOfStream)
                 {
                     staticTimer.start("ReportReading");
@@ -252,7 +256,7 @@ namespace PIOprocessing {
                         frequencies.Add(freqLabels[i],float.Parse(values[freqColumn]));
                         i++;
                     }
-                    Hand hand = new Hand(values[Mappings.ReportColumns["Flop"]],values[Mappings.ReportColumns["Hand"]],float.Parse(values[Mappings.ReportColumns["Weight"]]),frequencies);
+                    Hand hand = new Hand(values[Mappings.ReportColumns["Flop"]],values[Mappings.ReportColumns["Hand"]],float.Parse(values[Mappings.ReportColumns["Weight"]]),frequencies,rownumber++);
                     hands.Add(hand);
                     staticTimer.stop("ReportReading");
                     HandGroup group;

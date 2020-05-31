@@ -11,6 +11,9 @@ using System.Windows.Forms.PropertyGridInternal;
 using System.Windows;
 using PIOprocessing.Views;
 using System.Windows.Controls;
+using System.Runtime.Remoting.Metadata.W3cXsd2001;
+using System.Windows.Forms.VisualStyles;
+using PIOprocessing.Models;
 
 namespace PIOprocessing.ViewModels
 {
@@ -18,7 +21,51 @@ namespace PIOprocessing.ViewModels
     public class ShellViewModel : Conductor<object>
     {
         IWindowManager manager = new WindowManager();
-        
+
+        public string BackgroundColour
+        {
+            get
+            {
+                return ThemeModel.BackgroundColour;
+            }
+        }
+        public string ForegroundColour
+        {
+            get
+            {
+                return ThemeModel.ForegroundColour;
+            }
+        }
+        public string Font
+        {
+            get
+            {
+                return ThemeModel.Font;
+            }
+        }
+        public string FontWeight
+        {
+            get
+            {
+                return ThemeModel.FontWeight;
+            }
+        }
+        public OxyColor OxyBackgroundColour
+        {
+            get
+            {
+                return ThemeModel.OxyBackgroundColour;
+            }
+        }
+        public OxyColor OxyForegroundColour
+        {
+            get
+            {
+                return ThemeModel.OxyForegroundColour;
+            }
+        }
+
+        public string PlaceholderLink { get; set; }
 
         private string reportsPath;
         private string pathFeedback;
@@ -40,6 +87,8 @@ namespace PIOprocessing.ViewModels
         private string subtypesVisibility;
 
         private string graphVisibility;
+        private string btnVisibility;
+        private string pillVisibility;
         private string placeholderVisibility;
 
         private int graphRow;
@@ -110,11 +159,14 @@ namespace PIOprocessing.ViewModels
             }
             subtypesVisibility = "Hidden";
             graphVisibility = "Hidden";
+            determineButtonVisibility();
             placeholderVisibility = "Visible";
             graphRow = 0;
             graphColumn = 1;
-
+            ThemeModel.RefreshTheme();
+            updatePlaceholderLink();
         }
+
 
         public BindableCollection<string> Actions
         {
@@ -153,6 +205,14 @@ namespace PIOprocessing.ViewModels
         {
             get { return graphVisibility; }
         }
+        public string BtnVisibility
+        {
+            get { return btnVisibility; }
+        }
+        public string PillVisibility
+        {
+            get { return pillVisibility; }
+        }
         public string PlaceholderVisibility
         {
             get { return placeholderVisibility; }
@@ -176,6 +236,7 @@ namespace PIOprocessing.ViewModels
         {
             selectedType = null;
             graphVisibility = "Hidden";
+            determineButtonVisibility();
             placeholderVisibility = "Visible";
             // spot.LoadPlotModel((HandType)selectedType);
             
@@ -183,6 +244,10 @@ namespace PIOprocessing.ViewModels
             NotifyOfPropertyChange(() => GraphVisibility);
             NotifyOfPropertyChange(() => PlaceholderVisibility);
             NotifyOfPropertyChange(() => SelectedType);
+        }
+        public void PillClearGraph()
+        {
+            BtnClearGraph();
         }
 
         public string SelectedAction
@@ -341,6 +406,7 @@ namespace PIOprocessing.ViewModels
                 if(selectedType != null)
                 {
                     graphVisibility = "Visible";
+                    determineButtonVisibility();
                     placeholderVisibility = "Hidden";
                     spot.LoadPlotModel((HandType)selectedType);
                     NotifyOfPropertyChange(() => PlotModel);
@@ -350,12 +416,82 @@ namespace PIOprocessing.ViewModels
             }
         }
 
+        private void determineButtonVisibility()
+        {
+            if(graphVisibility == "Visible")
+            {
+                switch (Properties.Settings.Default.Theme)
+                {
+                    case ("Matrix"):
+                        pillVisibility = "Visible";
+                        btnVisibility = "Hidden";
+                        break;
+                    default:
+                        pillVisibility = "Hidden";
+                        btnVisibility = "Visible";
+                        break;
+
+                }
+            } else
+            {
+                pillVisibility = "Hidden";
+                btnVisibility = "Hidden";
+            }
+            NotifyOfPropertyChange(() => btnVisibility);
+            NotifyOfPropertyChange(() => pillVisibility);
+        }
+
         public void BrowseHands()
         {
-            manager.ShowWindow(new HandBrowserViewModel(spot.HandGroup), null, null);
+            string windowTitle = "Source: " + spot.Report.FilePath;
+            manager.ShowWindow(new HandBrowserViewModel(spot.HandGroup,windowTitle), null, null);
             // ActivateItem(new HandBrowserViewModel(spot.HandGroup));
         }
 
+        public void PillBrowse()
+        {
+            BrowseHands();
+        }
+
+        public void OpenPreferences()
+        {
+            manager.ShowDialog(new PreferencesViewModel());
+
+            if (selectedType != null && typeList.Contains((HandType)selectedType))
+            {
+                spot.LoadPlotModel((HandType)selectedType);
+                NotifyOfPropertyChange(() => PlotModel);
+            } else
+            {
+                BtnClearGraph();
+            }
+
+            updatePlaceholderLink();
+            determineButtonVisibility();
+
+            NotifyOfPropertyChange(() => BackgroundColour);
+            NotifyOfPropertyChange(() => ForegroundColour);
+            NotifyOfPropertyChange(() => Font);
+            NotifyOfPropertyChange(() => FontWeight);
+        }
+
+        private void updatePlaceholderLink()
+        {
+            switch(Properties.Settings.Default.Theme)
+            {
+                case ("Ariana Grande"):
+                    PlaceholderLink = "/Images/GrandeTato.gif";
+                    break;
+                case ("Matrix"):
+                    PlaceholderLink = "/Images/MatriTato.gif";
+                    break;
+                default:
+                    PlaceholderLink = "/Images/Placeholder.gif";
+                    break;
+            }
+
+            NotifyOfPropertyChange(() => PlaceholderLink);
+        }
 
         public void RefreshPath()
         {

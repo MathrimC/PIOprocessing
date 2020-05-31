@@ -5,6 +5,9 @@ using System;
 namespace PIOprocessing {
     public class Hand
     {
+        protected int csvRowNumber;
+        public int CsvRowNumber { get { return csvRowNumber; } }
+
         public Comparison<Card> CardComp = new Comparison<Card>((x, y) => x.RankNumber - y.RankNumber);
         protected Card[] flopCards;
         public Card[] FlopCards {get {return flopCards;}}
@@ -35,7 +38,7 @@ namespace PIOprocessing {
         protected bool strengthCalculated;
 
         
-        public Hand(string flop, string hand, float weight, Dictionary<string,float> frequencies) {
+        public Hand(string flop, string hand, float weight, Dictionary<string,float> frequencies, int rownumber) {
             flopCards = parseCards(flop,3);
             Array.Sort(flopCards,CardComp);
             holeCards = parseCards(hand,2);
@@ -45,6 +48,7 @@ namespace PIOprocessing {
             strengthCalculated = false;
             flopText = flop;
             holeCardsText = hand;
+            csvRowNumber = rownumber;
         }
 
         public bool isSuited() {

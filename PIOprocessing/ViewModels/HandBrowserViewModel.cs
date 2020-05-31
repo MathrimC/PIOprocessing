@@ -1,6 +1,7 @@
 ﻿using Caliburn.Micro;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Data;
 using System.Linq;
 using System.Text;
@@ -14,6 +15,7 @@ namespace PIOprocessing.ViewModels
     class HandBrowserViewModel : Conductor<Object>
     {
         public DataTable HandsData { get; set; }
+        public ICollectionView HandsView { get; set; }
 
         public string WindowTitle { get; set; }
         //public BindableCollection<HandModel> Hands { get; set; }
@@ -24,9 +26,10 @@ namespace PIOprocessing.ViewModels
         // public List<string> Headers { get; set; }
         // public string[][] HandData { get; set; }
         
-        public HandBrowserViewModel(HandGroup handGroup)
+        public HandBrowserViewModel(HandGroup handGroup, string windowTitle)
         {
-            WindowTitle = $"{handGroup.Spot.Action} {handGroup.Spot.AggPos}vs{handGroup.Spot.CllPos} {handGroup.Spot.BoardSubtype} {handGroup.Spot.BoardSubtype} {handGroup.HandType.ToString()}";
+            // WindowTitle = $"{handGroup.Spot.Action} {handGroup.Spot.AggPos}vs{handGroup.Spot.CllPos} {handGroup.Spot.BoardSubtype} {handGroup.Spot.BoardSubtype} {handGroup.HandType.ToString()}";
+            WindowTitle = windowTitle;
             NotifyOfPropertyChange(() => WindowTitle);
             LoadDataGrid(handGroup);
         }
@@ -34,42 +37,53 @@ namespace PIOprocessing.ViewModels
 
         public void LoadDataGrid(HandGroup handGroup)
         {
+            Console.WriteLine("Loading starts");
+            
             HandsData = new DataTable();
             addHeaders(handGroup.GetFrequencyLabels());
 
-            int rowIndex = 0;
+            // int rowIndex = 0;
             foreach (int strengthorder in handGroup.GetStrengthOrders())
             {
                 foreach (Hand hand in handGroup.GetHands(strengthorder))
                 {
-                    addRow(hand,rowIndex++);
+                    addRow(hand);
                 }
             }
+            
+            HandsView = CollectionViewSource.GetDefaultView(HandsData);
+            HandsView.GroupDescriptions.Clear();
+            if(Properties.Settings.Default.GroupHands)
+            {
+                HandsView.GroupDescriptions.Add(new PropertyGroupDescription("Strength label"));
+                
+            }
+            Console.WriteLine("Loading ends");
 
         }
 
         private void addHeaders(string[] freqLabels)
         {
-            HandsData.Columns.Add("#");
+            HandsData.Columns.Add("#").DataType = typeof(int);
             HandsData.Columns.Add("Category");
             HandsData.Columns.Add("Type");
-            HandsData.Columns.Add("Strength order");
+            HandsData.Columns.Add("Strength order").DataType = typeof(int);
             HandsData.Columns.Add("Strength label");
             HandsData.Columns.Add("Holecards");
             HandsData.Columns.Add("Flop");
             foreach (string freqLabel in freqLabels)
             {
-                HandsData.Columns.Add(freqLabel);
+                HandsData.Columns.Add(freqLabel).DataType = typeof(float);
             }
-            HandsData.Columns.Add("Weight");
+            HandsData.Columns.Add("Weight").DataType = typeof(float);
         }
 
-        private void addRow(Hand hand, int rowIndex)
+        private void addRow(Hand hand)
         {
             string[] row = new string[HandsData.Columns.Count];
 
             int index = 0;
-            row[index++] = rowIndex.ToString();
+            row[index++] = hand.CsvRowNumber.ToString();
             row[index++] = hand.Strength.Category.ToString();
             row[index++] = hand.Strength.Type.ToString();
             row[index++] = hand.Strength.StrengthOrder.ToString();

@@ -10,7 +10,8 @@
         xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
         xmlns:call="http://www.caliburnproject.org"
         mc:Ignorable="d" 
-        Title="PIO Report Browser v1.3" Height="600" Width="1000" FontSize="18">
+        Title="PIO Report Browser v1.3" Height="600" WindowStartupLocation="CenterScreen" Width="1000" 
+        Background="{Binding BackgroundColour}"  FontSize="18" Foreground="{Binding ForegroundColour}" FontFamily="{Binding Font}" FontWeight="{Binding FontWeight}">
     
     
     <i:Interaction.Triggers>
@@ -42,13 +43,44 @@
         
 
         <!-- Row 0: Reports folder -->
-        
-        <TextBlock Grid.Row="1" Grid.Column="1" Text="Reports folder:"  
-                           Grid.ColumnSpan="1" HorizontalAlignment="Left" VerticalAlignment="Center"></TextBlock>
-        <Button  Grid.Row="1" Grid.Column="1" Width="75" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="120,0,0,0"
-                        Content="Browse" x:Name="BtnBrowse" FontSize="16"/>
-        <TextBlock Grid.Row="1" Grid.Column="1" MinWidth="200" Margin="200,0,0,0" x:Name="ReportsPath" FontSize="18"
-                         Grid.ColumnSpan="2" VerticalAlignment="Center" Panel.ZIndex="1"></TextBlock>
+
+        <Grid Grid.Row="1" Grid.Column="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="auto"/>
+                <ColumnDefinition Width="auto"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Column="0" Text="Reports folder:"  
+                               Grid.ColumnSpan="1" HorizontalAlignment="Left" VerticalAlignment="Center"></TextBlock>
+            <Button  Grid.Column="1" Width="75" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,0,0,0"
+                            Content="Browse" x:Name="BtnBrowse" FontSize="16">
+                <Button.Resources>
+                    <Style TargetType="Border">
+                        <Setter Property="CornerRadius" Value="5"/>
+                    </Style>
+                </Button.Resources>
+            </Button>
+            <TextBlock Grid.Column="2" MinWidth="200" Margin="10,0,0,0" x:Name="ReportsPath" FontSize="18"
+                             Grid.ColumnSpan="2" VerticalAlignment="Center" Panel.ZIndex="1"></TextBlock>
+            <Button x:Name="OpenPreferences" Grid.Column="2" HorizontalAlignment="Right"
+                    Width="25" Height="25" Panel.ZIndex="2">
+                <Image Source="/Images/cogwheel.png"/>
+                <Button.Resources>
+                    <Style TargetType="Border">
+                        <Setter Property="CornerRadius" Value="5"/>
+                    </Style>
+                </Button.Resources>
+            </Button>
+
+        </Grid>
+
+        <!--
+                    <Button.Template>
+                <ControlTemplate>
+                    <Image Source="/Images/cogwheel.png"/>
+                </ControlTemplate>
+            </Button.Template>
+        -->
 
         <!-- Row 2: Patch feedback -->
         <TextBlock Grid.Row="2" Grid.Column="1" Margin="20,0,0,0"
@@ -96,6 +128,7 @@
                 <ComboBox Grid.Row="3" Grid.Column="0" x:Name="Actions"
                           SelectedItem="{Binding Path=SelectedAction}"
                           Margin="10,5,10,5"/>
+
                 <ComboBox Grid.Row="3" Grid.Column="1" x:Name="AggPosList"
                           SelectedItem="{Binding Path=SelectedAggPos}"
                           Margin="10,5,10,5"/>
@@ -149,18 +182,51 @@
                 </Grid.RowDefinitions>
 
                 <!-- Buttons above the graph -->
-                <Button Grid.Row="0" Grid.Column="0" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="60,0"
-                            Content="Browse hands" x:Name="BrowseHands" FontSize="16" Visibility="{Binding Path=GraphVisibility}" Panel.ZIndex="2" />
-                <Button Grid.Row="0" Grid.Column="0" Width="50" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,0,0,0" 
-                            Content="Clear" x:Name="BtnClearGraph" FontSize="16" Visibility="{Binding Path=GraphVisibility}" Panel.ZIndex="2" />
+                <Button Grid.Row="0" Grid.Column="0" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="70,0" Padding="10,1"
+                            Content="Browse hands" x:Name="BrowseHands" FontSize="16" Visibility="{Binding Path=BtnVisibility}" Panel.ZIndex="2">
+                    <Button.Resources>
+                        <Style TargetType="Border">
+                            <Setter Property="CornerRadius" Value="5"/>
+                        </Style>
+                    </Button.Resources>
+                </Button>
+                <Button Grid.Row="0" Grid.Column="0" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,0,0,0" Padding="10,1"
+                            Content="Clear" x:Name="BtnClearGraph" FontSize="16" Visibility="{Binding Path=BtnVisibility}" Panel.ZIndex="2">
+                    <Button.Resources>
+                        <Style TargetType="Border">
+                            <Setter Property="CornerRadius" Value="5"/>
+                        </Style>
+                    </Button.Resources>
+                </Button>
+                <!-- Pills above the graph -->
+                <Button Grid.Row="0" Grid.Column="0" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="80,0"
+                            Width="60" Height="25" FontSize="16" Visibility="{Binding Path=PillVisibility}" Panel.ZIndex="2"
+                        Background="Red" BorderBrush="#00707070" x:Name="PillBrowse">
+                    <Button.Resources>
+                        <Style TargetType="Border">
+                            <Setter Property="CornerRadius" Value="90"/>
+                        </Style>
+                    </Button.Resources>
+                </Button>
+
+                <Button Grid.Row="0" Grid.Column="0" HorizontalAlignment="Right" VerticalAlignment="Top" 
+                            Width="60" Height="25" FontSize="16" Visibility="{Binding Path=PillVisibility}" Panel.ZIndex="2"
+                        Background="Blue" BorderBrush="#00707070" x:Name="PillClearGraph">
+
+                    <Button.Resources>
+                        <Style TargetType="Border">
+                            <Setter Property="CornerRadius" Value="90"/>
+                        </Style>
+                    </Button.Resources>
+                </Button>
                 <!-- Graph -->
                 <oxy:PlotView Grid.Row="1" Grid.Column="0" MinHeight="300" Model="{Binding PlotModel}" Visibility="{Binding Path=GraphVisibility}" Panel.ZIndex="1"
-                              VerticalAlignment="Stretch">
+                              VerticalAlignment="Stretch" Background="{Binding BackgroundColour}">
 
                 </oxy:PlotView>
 
                 <!-- Placeholder -->
-                <Image Grid.Row="1" Grid.Column="0" gif:ImageBehavior.AnimatedSource="/Images/Placeholder.gif" Visibility="{Binding Path=PlaceholderVisibility}"/>
+                <Image Grid.Row="1" Grid.Column="0" gif:ImageBehavior.AnimatedSource="{Binding PlaceholderLink}" Visibility="{Binding Path=PlaceholderVisibility}"/>
                 
 
             </Grid>
@@ -172,4 +238,24 @@
         <ItemsControl ItemsSource="{Binding DG}" Grid.Row="4" Grid.Column="1" />
         -->
     </Grid>
+
+    <Window.Resources>
+
+        <ControlTemplate x:Key="ButtonControlTemplate" TargetType="{x:Type Button}">
+            <Grid>
+                <Ellipse Stroke="Black" VerticalAlignment="Top" Height="25" x:Name="theEllipse"/>
+                <ContentPresenter VerticalAlignment="Center" HorizontalAlignment="Center"/>
+            </Grid>
+            <ControlTemplate.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Fill" Value="Yellow" TargetName="theEllipse"/>
+                </Trigger>
+                <Trigger Property="IsPressed" Value="True">
+                    <Setter Property="Fill" Value="Gray" TargetName="theEllipse"/>
+                </Trigger>
+            </ControlTemplate.Triggers>
+        </ControlTemplate>
+
+    </Window.Resources>
+
 </Window>

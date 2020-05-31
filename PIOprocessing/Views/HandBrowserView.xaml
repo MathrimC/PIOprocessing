@@ -8,7 +8,7 @@
         xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
         xmlns:call="http://www.caliburnproject.org"
         mc:Ignorable="d"
-        Title="{Binding WindowTitle}" Height="650" Width="1100" FontSize="20">
+        Title="{Binding WindowTitle}" WindowStartupLocation="CenterScreen" Height="650" Width="1100" FontSize="20">
     <Grid x:Name="grid" Width="auto" Background="LightGray">
         <Grid.RowDefinitions>
             <RowDefinition Height="*" />
@@ -18,9 +18,49 @@
             <ColumnDefinition Width="auto" />
             <ColumnDefinition Width="20"/>
         </Grid.ColumnDefinitions>
-        <DataGrid Grid.Row="0" Grid.Column="0" x:Name="DG" ItemsSource="{Binding Path=HandsData}" AutoGenerateColumns="True" AlternatingRowBackground="Silver" 
-                  CanUserAddRows="False" IsReadOnly="True" 
-                  />
+        <DataGrid Grid.Row="0" Grid.Column="0" x:Name="DG" ItemsSource="{Binding Path=HandsView}" AutoGenerateColumns="True" AlternatingRowBackground="Silver" 
+                  CanUserAddRows="False" IsReadOnly="True" >
+
+            <DataGrid.GroupStyle>
+                <!-- Style for groups at top level. -->
+                <GroupStyle>
+                    <GroupStyle.ContainerStyle>
+                        <Style TargetType="{x:Type GroupItem}">
+                            <Setter Property="Margin" Value="0,0,0,5"/>
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="{x:Type GroupItem}">
+                                        <Expander IsExpanded="False" Background="#FF7C7C7C" BorderBrush="#FF111111" Foreground="#FF000000" BorderThickness="1,1,1,5">
+                                            <Expander.Header>
+                                                <DockPanel>
+                                                    <TextBlock FontWeight="Bold" Text="Handstrenght: " Margin="5,0,0,0" />
+                                                    <TextBlock FontWeight="Bold" Text="{Binding Path=Name}" Margin="5,0,0,0" Width="100"/>
+                                                    <TextBlock FontWeight="Bold" Text="{Binding Path=ItemCount}"/>
+                                                </DockPanel>
+                                            </Expander.Header>
+                                            <Expander.Content>
+                                                <ItemsPresenter />
+                                            </Expander.Content>
+                                        </Expander>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </GroupStyle.ContainerStyle>
+                </GroupStyle>
+                <!-- Style for groups under the top level. -->
+                <GroupStyle>
+                    <GroupStyle.HeaderTemplate>
+                        <DataTemplate>
+                            <DockPanel Background="LightBlue">
+                                <TextBlock Text="{Binding Path=Name, Converter={StaticResource completeConverter}}" Foreground="Blue" Margin="30,0,0,0" Width="100"/>
+                                <TextBlock Text="{Binding Path=ItemCount}" Foreground="Blue"/>
+                            </DockPanel>
+                        </DataTemplate>
+                    </GroupStyle.HeaderTemplate>
+                </GroupStyle>
+            </DataGrid.GroupStyle>
+        </DataGrid>
 
         <!--
             <i:Interaction.Triggers>
