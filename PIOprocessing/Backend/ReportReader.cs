@@ -7,7 +7,6 @@ using System.Windows;
 namespace PIOprocessing {
     class ReportReader
     {
-        protected bool isLoaded;
         protected string path;
         protected List<Report> reports;
         protected List<Report> unprocessedReports;
@@ -50,7 +49,6 @@ namespace PIOprocessing {
         {
             staticTimer.start("ReportScanning");
             this.path = path;
-            isLoaded = false;
             reports = new List<Report>();
             unprocessedReports = new List<Report>();
             actionList = new HashSet<string>();

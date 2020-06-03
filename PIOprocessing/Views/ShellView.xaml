@@ -40,8 +40,6 @@
             <ColumnDefinition Width="20"/>
         </Grid.ColumnDefinitions>
 
-        
-
         <!-- Row 0: Reports folder -->
 
         <Grid Grid.Row="1" Grid.Column="1">
@@ -73,14 +71,6 @@
             </Button>
 
         </Grid>
-
-        <!--
-                    <Button.Template>
-                <ControlTemplate>
-                    <Image Source="/Images/cogwheel.png"/>
-                </ControlTemplate>
-            </Button.Template>
-        -->
 
         <!-- Row 2: Patch feedback -->
         <TextBlock Grid.Row="2" Grid.Column="1" Margin="20,0,0,0"
